@@ -1,0 +1,52 @@
+.page_titles {
+  text-align: center !important;
+  margin-left:auto;
+  margin-right:auto;
+}
+.top_buffer {
+  margin-top: 7%;
+}
+.top_sm_buffer {
+  margin-top: 2%;
+}
+
+/************* HOMEPAGE ****************/
+.home_div  p {
+  font-size: 18px;
+}
+.btn-home, .btn-home:active {
+  color: #007bff !important;
+  border-color: #007bff !important;
+  background-color: #fff !important;
+  border-width: 3px !important;
+}
+.btn-home:hover {
+  color: #fff !important;
+  background-color: #007bff !important;
+  box-shadow: none !important;
+  transition-duration: 0.4s;
+}
+#homeImage > img {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* *********** CERTIFY PAGE ************ */
+.certify_submit {
+  width: 100%;
+}
+.select2 {
+    width: 100% !important;
+    height: 53% !important;
+}
+.select2 > span > span {
+    padding: 0 !important;
+    height: 100% !important;
+}
+
+h1 { font-family: Ubuntu; font-size: 24px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 26.4px; } h3 { font-family: Ubuntu; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px; } p { font-family: Ubuntu; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 20px; } blockquote { font-family: Ubuntu; font-size: 21px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 30px; } pre { font-family: Ubuntu; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 18.5714px; }
+
+a, nav, body {
+  font-family: Ubuntu !important;
+}
