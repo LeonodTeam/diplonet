@@ -26,11 +26,7 @@
   box-shadow: none !important;
   transition-duration: 0.4s;
 }
-#homeImage > img {
-    width: 70%;
-    margin-left: auto;
-    margin-right: auto;
-}
+
 
 /* *********** CERTIFY PAGE ************ */
 .certify_submit {
