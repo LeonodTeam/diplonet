@@ -29,6 +29,10 @@
 
 
 /* *********** CERTIFY PAGE ************ */
+#certif_page_img {
+  height: 200px;
+}
+
 .certify_submit {
   width: 100%;
 }
