@@ -103,11 +103,74 @@ function check_mnemonics() {
 
 // Creates a Bitcoin transaction with an OP_RETURN as output containing the hash of the informations
 // provided in the form, signing it with the mnemonics passed as parameters.
+// The hash is composed of : the rncp code + the awarding date + the student name in lowercase, without any space + his birthdate without any separator.
+// The source of the rncps is the onicep.
 // :param mnemonics: The words to derive a private key from, as a string
 // :return: A transaction object
 function createTransaction(mnemonics) {
-    mnemonic_entropy = buffer.Buffer.from(bip39.mnemonicToEntropy(mnemonics));
-    keypair = Bitcoin.ECPair.fromPrivateKey(mnemonic_entropy);
+    // Get the hash from form entries
+    const mnemonic_entropy = buffer.Buffer.from(bip39.mnemonicToEntropy(mnemonics));
+    const keypair = Bitcoin.ECPair.fromPrivateKey(mnemonic_entropy, {network: Bitcoin.networks.testnet});
+    const address = Bitcoin.payments.p2pkh({pubkey: keypair.publicKey, network: Bitcoin.networks.testnet}).address; // :'(
+    const form = document.getElementById('form_certify');
+    const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
+    const year = buffer.Buffer.from(form.awarding_year.value);
+    const name = buffer.Buffer.from(form.student_name.value.toLowerCase().replace(/\s+/g, ''));
+    const birthdate = buffer.Buffer.from(form.student_birthdate.value.replace(/\//g, ''));
+    console.log('Hashing ' + rncp + ' ' + year + ' ' + name + ' ' + birthdate);
+    const hash = Bitcoin.crypto.sha256(rncp + year + name + birthdate);
+    console.log(hash);
+    // Create a transaction with an OP_RETURN output containing this hash
+    const tx = new Bitcoin.TransactionBuilder();
+    out_opreturn = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, hash])
+    tx.addOutput(out_opreturn, 0);
+    // 10 block confirmation is OK, no need for an instant inclusion in a block.
+    return fetch('https://blockstream.info/testnet/api/fee-estimates').then((r) => r.json()).then((fees) => fees['10']).then((feerate) => {
+        // Fetching UTXOs txids to add as input of this tx
+        const inputs = [];
+        // https://en.bitcoin.it/wiki/Weight_units
+        //          version flag nin nout outvalue outscriptsize outscript sigsize sig pubkeysize pubkey locktime
+        const tx_vsize = 4 + 1 + 1 + 1 + 8 + 1 + out_opreturn.length + 1 + 72 + 1 + 32 + 4
+        let sats_needed = feerate * tx_vsize // We just need to pay for the fee.
+        return fetch('https://blockstream.info/testnet/api/address/'+address+'/utxo').then((r) => r.json()).then((utxos) => {
+            // First we check for little inputs to avoid making a second output (and to help the network ^^)
+            for (let i = 0; i < utxos.length; ++i) {
+                if (utxos[i].value < sats_needed) {
+                    sats_needed -= utxos.value;
+                    sats_needed += 64 * feerate; // txid + index + script length + script + sequence, taking an approximate script size of 23bytes
+                    inputs.push(utxos[i]);
+                }
+                if (sats_needed <= 0) {
+                    break;
+                }
+            }
+            // If the value has not been filled then check any input
+            for (let i = 0; i < utxos.length; ++i) {
+                if (sats_needed > 0) {
+                    sats_needed -= utxos.value;
+                    sats_needed += 64; // txid + index + script length + script + sequence, taking an approximate script size of 23bytes
+                    txs.push(utxos[i]);
+                } else {
+                    break;
+                }
+            }
+            if (sats_needed <= -35 * feerate) {
+                // It becomes viable to create another output
+                const value = -sats_needed;
+                console.log('Creating another ouput of ' + value.toString() + ' for change.');
+                tx.addOutput(address, -sats_needed);
+            }
+            else if (sats_needed > 0) {
+                throw 'Not enough funds to send the transaction';
+            }
+            // We now got all inputs
+            for (let i = 0; i < inputs.length; ++i) {
+                tx.addInput(inputs[i].txid, inputs[i].vout);
+                tx.sign(i, keypair.privateKey);
+            }
+            return tx.build().toHex();
+        });
+    });
 }
 
 
@@ -125,11 +188,14 @@ function setup() {
         .then((doc) => {
             let diploms = [];
             doc.forEach((obj) => {
-                let diplom = obj.sigle_type_formation != "" ? obj.sigle_type_formation + '  ' : '';
-                diplom += obj.libelle_formation_principal + ' ' + obj.libelle_formation_complementaire;
-                diplom += obj.libelle_niveau_rncp != "non inscrit au RNCP" ? ' -- ' + obj.libelle_niveau_rncp : '  (non inscrit au RNCP)';
-                diplom = diplom.charAt(0).toUpperCase() + diplom.slice(1);
-                diploms.push(diplom);
+                if (obj.code_rncp != "") {
+                    let diplom = obj.sigle_type_formation != "" ? obj.sigle_type_formation + '  ' : '';
+                    diplom += obj.libelle_formation_principal + ' ' + obj.libelle_formation_complementaire;
+                    diplom += obj.libelle_niveau_rncp;
+                    diplom += " --- RNCP : " + obj.code_rncp;
+                    diplom = diplom.charAt(0).toUpperCase() + diplom.slice(1);
+                    diploms.push(diplom);
+                }
             });
             diploms = diploms.sort();
             diploms.forEach((diplom) => {
@@ -162,9 +228,10 @@ function setup() {
         document.getElementById('btn_signtx').addEventListener('click', (e) => {
             e.preventDefault();
             //if (check_mnemonics()) {
-                tx = createTransaction(document.getElementById('form_mnemonic').mnemonics.value);
+                createTransaction(document.getElementById('form_mnemonic').mnemonics.value).then((tx) => console.log(tx));
             //}
         });
+
     }, false);
 }
 
