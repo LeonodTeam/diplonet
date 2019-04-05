@@ -109,8 +109,8 @@ function check_mnemonics() {
 // :return: A transaction object
 function createTransaction(mnemonics) {
     // Get the hash from form entries
-    const mnemonic_entropy = buffer.Buffer.from(bip39.mnemonicToEntropy(mnemonics));
-    const keypair = Bitcoin.ECPair.fromPrivateKey(mnemonic_entropy, {network: Bitcoin.networks.testnet});
+    const mnemonic_entropy = buffer.Buffer.from(bip39.mnemonicToEntropy(mnemonics), 'hex');
+    const keypair = Bitcoin.ECPair.fromPrivateKey(mnemonic_entropy, Bitcoin.networks.testnet);
     const address = Bitcoin.payments.p2pkh({pubkey: keypair.publicKey, network: Bitcoin.networks.testnet}).address; // :'(
     const form = document.getElementById('form_certify');
     const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
@@ -149,7 +149,7 @@ function createTransaction(mnemonics) {
                 if (sats_needed > 0) {
                     sats_needed -= utxos.value;
                     sats_needed += 64; // txid + index + script length + script + sequence, taking an approximate script size of 23bytes
-                    txs.push(utxos[i]);
+                    inputs.push(utxos[i]);
                 } else {
                     break;
                 }
@@ -166,7 +166,7 @@ function createTransaction(mnemonics) {
             // We now got all inputs
             for (let i = 0; i < inputs.length; ++i) {
                 tx.addInput(inputs[i].txid, inputs[i].vout);
-                tx.sign(i, keypair.privateKey);
+                tx.sign(i, keypair);
             }
             return tx.build().toHex();
         });
