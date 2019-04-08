@@ -110,18 +110,16 @@ function check_mnemonics() {
 function createTransaction(mnemonics) {
     // Get the hash from form entries
     const mnemonic_entropy = buffer.Buffer.from(bip39.mnemonicToEntropy(mnemonics), 'hex');
-    const keypair = Bitcoin.ECPair.fromPrivateKey(mnemonic_entropy, Bitcoin.networks.testnet);
+    const keypair = Bitcoin.ECPair.fromPrivateKey(mnemonic_entropy, { network: Bitcoin.networks.testnet });
     const address = Bitcoin.payments.p2pkh({pubkey: keypair.publicKey, network: Bitcoin.networks.testnet}).address; // :'(
     const form = document.getElementById('form_certify');
     const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
     const year = buffer.Buffer.from(form.awarding_year.value);
     const name = buffer.Buffer.from(form.student_name.value.toLowerCase().replace(/\s+/g, ''));
     const birthdate = buffer.Buffer.from(form.student_birthdate.value.replace(/\//g, ''));
-    console.log('Hashing ' + rncp + ' ' + year + ' ' + name + ' ' + birthdate);
     const hash = Bitcoin.crypto.sha256(rncp + year + name + birthdate);
-    console.log(hash);
     // Create a transaction with an OP_RETURN output containing this hash
-    const tx = new Bitcoin.TransactionBuilder();
+    const tx = new Bitcoin.TransactionBuilder(Bitcoin.networks.testnet);
     out_opreturn = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, hash])
     tx.addOutput(out_opreturn, 0);
     // 10 block confirmation is OK, no need for an instant inclusion in a block.
@@ -136,7 +134,7 @@ function createTransaction(mnemonics) {
             // First we check for little inputs to avoid making a second output (and to help the network ^^)
             for (let i = 0; i < utxos.length; ++i) {
                 if (utxos[i].value < sats_needed) {
-                    sats_needed -= utxos.value;
+                    sats_needed -= utxos[i].value;
                     sats_needed += 64 * feerate; // txid + index + script length + script + sequence, taking an approximate script size of 23bytes
                     inputs.push(utxos[i]);
                 }
@@ -147,7 +145,7 @@ function createTransaction(mnemonics) {
             // If the value has not been filled then check any input
             for (let i = 0; i < utxos.length; ++i) {
                 if (sats_needed > 0) {
-                    sats_needed -= utxos.value;
+                    sats_needed -= utxos[i].value;
                     sats_needed += 64; // txid + index + script length + script + sequence, taking an approximate script size of 23bytes
                     inputs.push(utxos[i]);
                 } else {
@@ -156,9 +154,8 @@ function createTransaction(mnemonics) {
             }
             if (sats_needed <= -35 * feerate) {
                 // It becomes viable to create another output
-                const value = -sats_needed;
-                console.log('Creating another ouput of ' + value.toString() + ' for change.');
-                tx.addOutput(address, -sats_needed);
+                const value = -sats_needed - 40;
+                tx.addOutput(address, value);
             }
             else if (sats_needed > 0) {
                 throw 'Not enough funds to send the transaction';
@@ -228,7 +225,22 @@ function setup() {
         document.getElementById('btn_signtx').addEventListener('click', (e) => {
             e.preventDefault();
             //if (check_mnemonics()) {
-                createTransaction(document.getElementById('form_mnemonic').mnemonics.value).then((tx) => console.log(tx));
+                createTransaction(document.getElementById('form_mnemonic').mnemonics.value).then((tx) => {
+                    // Broadcast the tx once again using Blockstream's API because bitcoinjs does not provide peer messaging.....
+                    fetch('https://blockstream.info/testnet/api/tx', {
+                        method: 'POST',
+                        body: tx,
+                        headers: {
+                            'Accept': '*/*'
+                        }
+                    })
+                    .then((response) => {
+                        console.log(response);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+                });
             //}
         });
 
