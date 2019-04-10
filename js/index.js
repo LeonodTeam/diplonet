@@ -35,32 +35,24 @@ function show_certify() {
 function check_form_certify() {
     const form = document.getElementById('form_certify');
     if (form.diplom.value == '') {
-        console.log('dip');
         return false;
     } else if (!(2010 <= parseInt(form.diplom.awarding_year, 10) <= 2019)) {
-        console.log('award');
         return false;
     } else if (!form.student_name.value.match(/^[A-Za-z ]+$/)) {
         // The name MUST be composed of only letters and space
-        console.log('name');
         return false;
     }
     const birthdate = form.birthdate.value.split('/');
     console.log(birthdate);
     if (birthdate.length != 3) {
-        console.log('length');
         return false;
     } else if (!(1 <= parseInt(birthdate[0], 10) <= 31)) {
-        console.log('jour');
         return false;
     } else if (!(1 <= parseInt(birthdate[1], 10) <= 12)) {
-        console.log('mois');
         return false;
     } else if (!(1919 <= parseInt(birthdate[2], 10) <= 2019)) {
-        console.log('jour');
         return false;
     }
-    console.log('Tout va bien');
     return true;
 }
 
@@ -233,9 +225,17 @@ function setup() {
                         headers: {
                             'Accept': '*/*'
                         }
-                    })
-                    .then((response) => {
-                        console.log(response);
+                    }).then((r) => r.text())
+                    .then((txid) => {
+                        const form = document.getElementById('form_mnemonic');
+                        form.innerHTML = '';
+                        const row = document.createElement('div');
+                        row.className += 'row';
+                        const span = document.createElement('span');
+                        span.className = 'badge badge-success';
+                        span.innerHTML = 'Succesfully sent the transaction to the Bitcoin network. Txid : ' + txid;
+                        row.appendChild(span);
+                        form.appendChild(row);
                     })
                     .catch((error) => {
                         console.log(error);
