@@ -45,10 +45,10 @@
         <li class="nav-item" id="header_link_verify">
           <a class="nav-link" href="#">Verify</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" id="header_link_about">
           <a class="nav-link" href="#">About</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" id="header_link_contact">
           <a class="nav-link" href="#">Contact us</a>
         </li>
       </ul>
@@ -61,7 +61,7 @@
   </nav>
  
   <!-- HOMEPAGE CONTENT -->
-<div class="container-fluid">
+
   
   <div class="row home_div" id="home_div">
     <div class="offset-3 col-md-6">
@@ -98,28 +98,25 @@
           <button type="button" class="btn btn-primary btn-block btn-home" id="homepage_certify_button">School</button>
         </div>
         <div class="col">
-          <button type="button" class="btn btn-primary btn-block btn-home" id="homepage_verify_button">graduate</button>
+          <button type="button" class="btn btn-primary btn-block btn-home" id="homepage_graduate_button">graduate</button>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-  <!-- CERTIF DIPLOM -->
+
+  <!-- CERTIF DIPLOMA -->
   <div class="row" id="certif_diplom_div">
     
 
     <div class="col text-center">
-      <img src="static//img/scroll2.png" id="certif_page_img" alt="emit diplomas oer BTC network">
+      <img src="static//img/scroll2.png" id="certif_page_img" alt="emit diplomas over BTC network">
     </div>
-
-    
-    
-    
+     
     <div class="offset-2 col-md-8">
       <form class="row" id="form_certify">
-        <div class="page_titles"><h3 class="display-3">Certify a diplom</h3></div>
-        <div class="offset-md-1 col-md-10">
+        <div class="page_titles"><h3 class="display-3">Certify a diploma</h3></div>
+        <div class="offset-md-1 col-md-10 top_buffer">
           <div class="form-row">
             <div class="form-group offset-md-1 col-md-8">
               <label for="diplom_list">Diplom identifier</label>
@@ -143,7 +140,7 @@
             </div>
           </div>
           <div class="form-row">
-            <div class="offset-md-4 col-md-4">
+            <div class="offset-md-4 col-md-4 top_buffer">
               <button type="submit" id="btn_certify" name="btn_submit" class="btn btn-primary certify_submit">Certify</button>
             </div>
           </div>
@@ -176,7 +173,116 @@
     </div>
   </div>
   
+ 
+  <!-- VERIFY DIPLOMA -->
+
+  <div class="row" id="verif_diplom_div">
+    
+
+    <div class="col text-center">
+      <img src="static//img/CV.png" id="certif_page_img" alt="check authenticity of a diploma emitted on BTC network">
+    </div>
+
+    
+    
+    
+    <div class="offset-2 col-md-8">
+      <form class="row" id="form_certify">
+        <div class="page_titles"><h3 class="display-3">Verify a diploma</h3></div>
+        <div class="offset-md-1 col-md-10 top_buffer">
+          <div class="form-row">
+            <div class="form-group offset-md-1 col-md-8">
+              <label for="diplom_list">Diplom identifier</label>
+              <select id="diplom_list" class="select2_list form-control" name="diplom">
+                <option></option>
+              </select>
+            </div>
+            <div class="form-group col-md-2">
+              <label for="awarding_year">Awarding</label>
+              <input class="form-control" type="number" id="awarding_year" name="awarding_year" placeholder="year" min="2010" max="2019"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group offset-md-1 col-md-4">
+              <label for="student_name">Student Name</label>
+              <input type="text" class="form-control" id="student_name" name="student_name" placeholder="Jean Dupont" require/>
+            </div>
+            <div class="form-group col-md-2">
+              <label for="student_birthdate">Student birthdate</label>
+              <input class="form-control" id="student_birthdate" name="birthdate" placeholder="JJ/MM/AAAA" type="text" require/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="offset-md-4 col-md-4 top_buffer">
+              <button type="certify" id="btn_certify" name="btn_certify" class="btn btn-primary certify_submit">Verify</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="modal top_buffer text-center" id="bitcoinTxModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Bitcoin transaction signing</h4>
+        </div>
+        <div class="modal-body">
+          <form class="container-fluid" id="form_mnemonic">
+            <div class="form-row">
+              <div class="form-group offset-md-1 col-md-10">
+                <label for="bitcoin_mnemonic">Please enter your mnemonic to sign the transaction</label>
+                <input type="text" id="mnemonics" name="mnemonics" class="form-control">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group offset-md-1 col-md-10 text-center">
+                <button type="submit" class="btn btn-primary" id="btn_signtx">Sign the transaction</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ 
   <!-- ABOUT -->
+
+ 
+  
+    <div class="row" id="about_div">
+      <div class="offset-3 col-md-6">
+        <div class="row">
+          <div class="offset-3 col-md-6 text-center" id="homeImage">
+              <img src="static/img/diplonet_logo.png" class="img-fluid" alt="diplonet logo, blockchain certification">
+           </div>
+          </div>
+          <div class="row top_buffer">
+            <div class="col text-center">
+            <h2>About</h2>
+            <p>DiploNet aims to certificate diplomas by using a blockchain technology</p>
+            <p>Today, there is around 8% of fake diplomas advertised on resumes. DiploNet is here to fix this.</p>
+            <p>Te process is initiated by schools administration services on their DiploNet own space. 
+              DiploNet platform, thereafter, generates identification QR code for each diploma in order to assess their validity.
+              Then graduates are able to guarantee their certification by reporting their QR code on resumes or other documents.
+              By scanning the QR code the recruiters can check the authenticity of candidates background in real-time.</p>
+            <p>Main benefits of DiploNet : <br>
+              Time saving for companies in their recruitment process <br>
+              Pledge of confidence for graduates <br>
+              Create a link between companies and business <br>
+              Enhance the brand awareness of schools among business <br>
+              Add value to certification degrees <br>
+              Cut fake and falsification of diplomas
+
+            </p>
+          </div>
+          </div>
+       
+        
+      </div>
+    </div>
+  
   
 </body>
 
