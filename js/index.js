@@ -22,6 +22,8 @@ function show_home() {
     aboutpage_div.style.display = 'none';
     // Set the header link as active
     set_active(document.getElementById('header_link_home'));
+    // Hide tx form error
+    document.getElementById('tx_form_result').style.display = 'none';
 }
 
 // Shows the page to certify a diploma
@@ -140,7 +142,12 @@ function check_mnemonics() {
 // :return: A transaction object
 function createTransaction(mnemonics) {
     // Get the hash from form entries
-    const mnemonic_entropy = buffer.Buffer.from(bip39.mnemonicToEntropy(mnemonics), 'hex');
+    let mnemonic_entropy;
+    try {
+        mnemonic_entropy = new buffer.Buffer.from(bip39.mnemonicToEntropy(mnemonics), 'hex');
+    } catch (e) {
+        throw 'Invalid mnemonic';
+    }
     const keypair = Bitcoin.ECPair.fromPrivateKey(mnemonic_entropy, { network: Bitcoin.networks.testnet });
     const address = Bitcoin.payments.p2pkh({pubkey: keypair.publicKey, network: Bitcoin.networks.testnet}).address; // :'(
     const form = document.getElementById('form_certify');
@@ -153,7 +160,7 @@ function createTransaction(mnemonics) {
     const tx = new Bitcoin.TransactionBuilder(Bitcoin.networks.testnet);
     out_opreturn = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, hash])
     tx.addOutput(out_opreturn, 0);
-    // 10 block confirmation is OK, no need for an instant inclusion in a block.
+    // 10 blocks confirmation is OK, no need for an instant inclusion in a block.
     return fetch('https://blockstream.info/testnet/api/fee-estimates').then((r) => r.json()).then((fees) => fees['10']).then((feerate) => {
         // Fetching UTXOs txids to add as input of this tx
         const inputs = [];
@@ -168,7 +175,7 @@ function createTransaction(mnemonics) {
                     sats_needed -= utxos[i].value;
                     sats_needed += 64 * feerate; // txid + index + script length + script + sequence, taking an approximate script size of 23bytes
                     inputs.push(utxos[i]);
-                }
+            }
                 if (sats_needed <= 0) {
                     break;
                 }
@@ -189,7 +196,7 @@ function createTransaction(mnemonics) {
                 tx.addOutput(address, value);
             }
             else if (sats_needed > 0) {
-                throw 'Not enough funds to send the transaction';
+                throw 'Not enough funds';
             }
             // We now got all inputs
             for (let i = 0; i < inputs.length; ++i) {
@@ -260,31 +267,47 @@ function setup() {
         }, false);
         document.getElementById('btn_signtx').addEventListener('click', (e) => {
             e.preventDefault();
+            document.getElementById('tx_form_result').style.display = 'none';
             //if (check_mnemonics()) {
-                createTransaction(document.getElementById('form_mnemonic').mnemonics.value).then((tx) => {
-                    // Broadcast the tx once again using Blockstream's API because bitcoinjs does not provide peer messaging.....
-                    fetch('https://blockstream.info/testnet/api/tx', {
-                        method: 'POST',
-                        body: tx,
-                        headers: {
-                            'Accept': '*/*'
-                        }
-                    }).then((r) => r.text())
-                    .then((txid) => {
-                        const form = document.getElementById('form_mnemonic');
-                        form.innerHTML = '';
-                        const row = document.createElement('div');
-                        row.className += 'row';
-                        const span = document.createElement('span');
-                        span.className = 'badge badge-success';
-                        span.innerHTML = 'Succesfully sent the transaction to the Bitcoin network. Txid : ' + txid;
-                        row.appendChild(span);
-                        form.appendChild(row);
+                try {
+                    createTransaction(document.getElementById('form_mnemonic').mnemonics.value).then((tx) => {
+                        // Broadcast the tx once again using Blockstream's API because bitcoinjs does not provide peer messaging.....
+                        fetch('https://blockstream.info/testnet/api/tx', {
+                            method: 'POST',
+                            body: tx,
+                            headers: {
+                                'Accept': '*/*'
+                            }
+                        }).then((r) => r.text())
+                        .then((txid) => {
+                            const result_div = document.getElementById('tx_form_result');
+                            if (result_div.classList.contains('alert-warning')) {
+                                result_div.classList.remove('alert-warning');
+                                result_div.classList.add('alert-success');
+                            }
+                            result_div.innerHTML = 'Succesfully sent the transaction to the Bitcoin network. Txid : ' + txid;
+                            result_div.style.display = 'block';
+                        });
                     })
                     .catch((error) => {
-                        console.log(error);
+                        const result_div = document.getElementById('tx_form_result');
+                        if (result_div.classList.contains('alert-success')) {
+                            result_div.classList.remove('alert-warning');
+                            result_div.classList.add('alert-warning');
+                        }
+                        result_div.innerHTML += ' ' + error;
+                        result_div.style.display = 'block';
                     });
-                });
+                }
+                catch (error) {
+                    const result_div = document.getElementById('tx_form_result');
+                    if (result_div.classList.contains('alert-success')) {
+                        result_div.classList.remove('alert-warning');
+                        result_div.classList.add('alert-warning');
+                    }
+                    result_div.innerHTML += ' ' + error;
+                    result_div.style.display = 'block';
+                }
             //}
         });
 
