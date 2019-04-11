@@ -167,7 +167,7 @@ function check_mnemonics() {
     return true;
 }
 
-function verify() {
+/* function verify() {
     const form = document.getElementById('form_verify');
     const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
     const year = buffer.Buffer.from(form.awarding_year.value);
@@ -178,11 +178,12 @@ function verify() {
 
     const txfromapi = fetch(`https://blockstream.info/testnet/api/tx/${submittedtx}`, {
         method: 'GET',
-        
-       // headers: {
-         //   'Accept': '*/*'
+
         }).then(txfromapi => {console.log(txfromapi)})
 }
+
+*/
+
 
 // Creates a Bitcoin transaction with an OP_RETURN as output containing the hash of the informations
 // provided in the form, signing it with the mnemonics passed as parameters.
