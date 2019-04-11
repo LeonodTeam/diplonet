@@ -141,7 +141,7 @@ function check_mnemonics() {
 // :param mnemonics: The words to derive a private key from, as a string
 // :return: A transaction object
 function createTransaction(mnemonics) {
-    // Get the hash from form entries
+    // Generate a Bitcoin keypair from mnemonics
     let mnemonic_entropy;
     try {
         mnemonic_entropy = new buffer.Buffer.from(bip39.mnemonicToEntropy(mnemonics), 'hex');
@@ -150,6 +150,7 @@ function createTransaction(mnemonics) {
     }
     const keypair = Bitcoin.ECPair.fromPrivateKey(mnemonic_entropy, { network: Bitcoin.networks.testnet });
     const address = Bitcoin.payments.p2pkh({pubkey: keypair.publicKey, network: Bitcoin.networks.testnet}).address; // :'(
+    // Get the hash from form entries
     const form = document.getElementById('form_certify');
     const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
     const year = buffer.Buffer.from(form.awarding_year.value);
@@ -207,7 +208,6 @@ function createTransaction(mnemonics) {
         });
     });
 }
-
 
 // Setup the behaviour of this one-pager website, adding the evenments, filling the dinamically allocated informations, etc..
 function setup() {
@@ -311,6 +311,14 @@ function setup() {
                     result_div.innerHTML += ' ' + error;
                     result_div.style.display = 'block';
                 }
+            }
+        });
+
+        // Verify page
+        document.getElementById('form_verify').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (a_function_to_check_the_form()) {
+                a_function_to_compute_the_hash_from_the_form_values_and_check_it();
             }
         });
 
