@@ -109,7 +109,7 @@
     
 
     <div class="col text-center">
-      <img src="static//img/scroll2.png" id="certif_page_img" alt="emit diplomas over BTC network">
+      <img src="static//img/scroll2.png" class="mainImage" alt="emit diplomas over BTC network">
     </div>
      
     <div class="offset-2 col-md-8">
@@ -118,8 +118,8 @@
         <div class="offset-md-1 col-md-10 top_buffer">
           <div class="form-row">
             <div class="form-group offset-md-1 col-md-8">
-              <label for="diplom_list">Diplom identifier</label>
-              <select id="diplom_list" class="select2_list form-control" name="diplom">
+              <label for="diplom_list_certify">Diplom identifier</label>
+              <select id="diplom_list_certify" class="select2_list form-control" name="diplom">
                 <option></option>
               </select>
             </div>
@@ -140,7 +140,7 @@
           </div>
           <div class="form-row">
             <div class="offset-md-4 col-md-4 top_buffer">
-              <button type="submit" id="btn_certify" name="btn_submit" class="btn btn-primary certify_submit">Certify</button>
+              <button type="submit" id="btn_certify" name="btn_submit" class="btn btn-primary diplom_submit">Certify</button>
             </div>
           </div>
         </div>
@@ -182,37 +182,37 @@
   <!-- VERIFY DIPLOMA -->
   <div class="row" id="verif_diplom_div">
     <div class="col text-center">
-      <img src="static//img/CV.png" id="certif_page_img" alt="check authenticity of a diploma emitted on BTC network">
+      <img src="static//img/CV.png" class="mainImage" alt="check authenticity of a diploma emitted on BTC network">
     </div>
     <div class="offset-2 col-md-8">
-      <form class="row" id="form_certify">
+      <form class="row" id="form_verify">
         <div class="page_titles"><h3 class="display-3">Verify a diploma</h3></div>
         <div class="offset-md-1 col-md-10 top_buffer">
           <div class="form-row">
             <div class="form-group offset-md-1 col-md-8">
-              <label for="diplom_list">Diplom identifier</label>
-              <select id="diplom_list" class="select2_list form-control" name="diplom">
+              <label for="diplom_list_verify">Diplom identifier</label>
+              <select id="diplom_list_verify" class="select2_list form-control" name="diplom">
                 <option></option>
               </select>
             </div>
             <div class="form-group col-md-2">
               <label for="awarding_year">Awarding</label>
-              <input class="form-control" type="number" id="awarding_year" name="awarding_year" placeholder="year" min="2010" max="2019"/>
+              <input class="form-control" type="number" name="awarding_year" placeholder="year" min="2010" max="2019"/>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group offset-md-1 col-md-4">
               <label for="student_name">Student Name</label>
-              <input type="text" class="form-control" id="student_name" name="student_name" placeholder="Jean Dupont" require/>
+              <input type="text" class="form-control" name="student_name" placeholder="Jean Dupont" require/>
             </div>
             <div class="form-group col-md-2">
               <label for="student_birthdate">Student birthdate</label>
-              <input class="form-control" id="student_birthdate" name="birthdate" placeholder="JJ/MM/AAAA" type="text" require/>
+              <input class="form-control" name="birthdate" placeholder="JJ/MM/AAAA" type="text" require/>
             </div>
           </div>
           <div class="form-row">
             <div class="offset-md-4 col-md-4 top_buffer">
-              <button type="certify" id="btn_certify" name="btn_certify" class="btn btn-primary certify_submit">Verify</button>
+              <button type="certify" name="btn_verify" class="btn btn-primary diplom_submit">Verify</button>
             </div>
           </div>
         </div>
@@ -225,7 +225,7 @@
     <div class="row" id="about_div">
       <div class="offset-3 col-md-6">
         <div class="row">
-          <div class="offset-3 col-md-6 text-center" id="homeImage">
+          <div class="offset-3 col-md-6 text-center">
               <img src="static/img/diplonet_logo.png" class="img-fluid" alt="diplonet logo, blockchain certification">
            </div>
           </div>
