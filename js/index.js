@@ -214,8 +214,9 @@ function setup() {
     document.addEventListener('DOMContentLoaded', () => {
         show_home();
         
-        // Populate diplom list in <select>
-        const element_select = document.getElementById('diplom_list');
+        // Populate diplom list in <select>s
+        const element_select_certify = document.getElementById('diplom_list_certify');
+        const element_select_verify = document.getElementById('diplom_list_verify');
         fetch('diplomes.json', {mode: 'no-cors'})
         .then((r) => {
             return r.json();
@@ -236,7 +237,10 @@ function setup() {
             diploms.forEach((diplom) => {
                 const option = document.createElement('option');
                 option.innerHTML = diplom;
-                element_select.appendChild(option);
+                const optionb = document.createElement('option');
+                optionb.innerHTML = diplom;
+                element_select_certify.appendChild(option);
+                element_select_verify.appendChild(optionb);
             });
         });
         // The search function for the select2 searchbox
@@ -260,15 +264,14 @@ function setup() {
         // Certify page
         document.getElementById('btn_certify').addEventListener('click', (e) => {
             e.preventDefault();
-           // if (check_form_certify()) {
+           if (check_form_certify()) {
                 $('#bitcoinTxModal').modal();
-           // }
-                
+           }
         }, false);
         document.getElementById('btn_signtx').addEventListener('click', (e) => {
             e.preventDefault();
             document.getElementById('tx_form_result').style.display = 'none';
-            //if (check_mnemonics()) {
+            if (check_mnemonics()) {
                 try {
                     createTransaction(document.getElementById('form_mnemonic').mnemonics.value).then((tx) => {
                         // Broadcast the tx once again using Blockstream's API because bitcoinjs does not provide peer messaging.....
@@ -308,7 +311,7 @@ function setup() {
                     result_div.innerHTML += ' ' + error;
                     result_div.style.display = 'block';
                 }
-            //}
+            }
         });
 
     }, false);
