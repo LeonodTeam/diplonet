@@ -97,6 +97,39 @@ function check_form_certify() {
     return true;
 }
 
+// Checks entries from user in the verify form
+// :return: True if informations seems correct, False otherwise
+function check_form_verify () {
+    const form = document.getElementById('form_verify');
+    if (form.diplom.value == '') {
+        return false;
+    } else if (!(2010 <= parseInt(form.diplom.awarding_year, 10) <= 2019)) {
+        return false;
+    } else if (!form.student_name.value.match(/^[A-Za-z ]+$/)) {
+        // The name MUST be composed of only letters and space
+        return false;
+    }
+    const birthdate = form.birthdate.value.split('/');
+    console.log(birthdate);
+    if (birthdate.length != 3) {
+        return false;
+    } else if (!(1 <= parseInt(birthdate[0], 10) <= 31)) {
+        return false;
+    } else if (!(1 <= parseInt(birthdate[1], 10) <= 12)) {
+        return false;
+    } else if (!(1919 <= parseInt(birthdate[2], 10) <= 2019)) {
+        return false;
+    }
+    const txid = form.txid.value;
+    if (txid.length != 32) {
+        return false;
+        //else if characters not allowed in txid
+    }
+
+    return true;
+}
+
+
 // Customize the select2 searchbox behaviour. Makes the entries match if the user types the first letters,
 // non case-sensitive, without considering spaces. 
 // HINT : $.trim() doesn't remove spaces as expected
@@ -132,6 +165,23 @@ function check_mnemonics() {
         }
     });
     return true;
+}
+
+function verify() {
+    const form = document.getElementById('form_verify');
+    const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
+    const year = buffer.Buffer.from(form.awarding_year.value);
+    const name = buffer.Buffer.from(form.student_name.value.toLowerCase().replace(/\s+/g, ''));
+    const birthdate = buffer.Buffer.from(form.student_birthdate.value.replace(/\//g, ''));
+    const submittedtx = buffer.Buffer.from(form.student_txid.value);
+    const hash = Bitcoin.crypto.sha256(rncp + year + name + birthdate);
+
+    const txfromapi = fetch(`https://blockstream.info/testnet/api/tx/${submittedtx}`, {
+        method: 'GET',
+        
+       // headers: {
+         //   'Accept': '*/*'
+        }).then(txfromapi => {console.log(txfromapi)})
 }
 
 // Creates a Bitcoin transaction with an OP_RETURN as output containing the hash of the informations
@@ -315,12 +365,13 @@ function setup() {
         });
 
         // Verify page
-        document.getElementById('form_verify').addEventListener('click', (e) => {
+        /*document.getElementById('form_verify').addEventListener('click', (e) => {
             e.preventDefault();
-            if (a_function_to_check_the_form()) {
-                a_function_to_compute_the_hash_from_the_form_values_and_check_it();
+            if (check_form_certify()) {
+
+            if a_function_to_compute_the_hash_from_the_form_values_and_check_it();
             }
-        });
+        }); */
 
     }, false);
 }

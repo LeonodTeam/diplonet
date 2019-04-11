@@ -27,6 +27,10 @@
   transition-duration: 0.4s;
 }
 
+.imghp {
+  border: 3px solid #68c2e8;
+}
+
 
 /* *********** CERTIFY AND VERIFY PAGE ************ */
 .mainImage {
@@ -53,4 +57,14 @@ h1 { font-family: Ubuntu; font-size: 24px; font-style: normal; font-variant: nor
 
 a, nav, body {
   font-family: Ubuntu !important;
+}
+
+/***********  ABOUT PAGE ****************/
+#about_title {
+  background-color: #bce2f3;
+}
+
+#about_list {
+  line-height: 70%;
+  margin-left: 5%;
 }
