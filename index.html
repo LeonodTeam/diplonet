@@ -167,7 +167,6 @@
               </div>
             </div>
             <div class="alert alert-warning" role="alert" id="tx_form_result">
-              Could not send the transaction.
               <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -201,17 +200,19 @@
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group col-md-3">
+            <div class="form-group offset-md-1 col-md-3">
               <label for="student_name">Student Name</label>
               <input type="text" class="form-control" name="student_name" placeholder="Jean Dupont" require/>
             </div>
             <div class="form-group col-md-2">
               <label for="student_birthdate">Student birthdate</label>
-              <input class="form-control" name="birthdate" placeholder="JJ/MM/AAAA" type="text" require/>
+              <input class="form-control" name="student_birthdate" placeholder="JJ/MM/AAAA" type="text" require/>
             </div>
-            <div class="form-group col-md-6">
-              <label for="student_txid">TXid</label>
-              <input type="text" class="form-control" name="student_txid" placeholder="f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" require/>
+          </div>
+          <div class="form-row">
+            <div class="form-group offset-md-1 col-md-7">
+              <label for="student_txid">Transaction ID</label>
+              <input type="text" class="form-control" name="txid" placeholder="f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16" require/>
             </div>
           </div>
           <div class="form-row">

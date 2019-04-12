@@ -84,7 +84,6 @@ function check_form_certify() {
         return false;
     }
     const birthdate = form.birthdate.value.split('/');
-    console.log(birthdate);
     if (birthdate.length != 3) {
         return false;
     } else if (!(1 <= parseInt(birthdate[0], 10) <= 31)) {
@@ -109,8 +108,7 @@ function check_form_verify () {
         // The name MUST be composed of only letters and space
         return false;
     }
-    const birthdate = form.birthdate.value.split('/');
-    console.log(birthdate);
+    const birthdate = form.student_birthdate.value.split('/');
     if (birthdate.length != 3) {
         return false;
     } else if (!(1 <= parseInt(birthdate[0], 10) <= 31)) {
@@ -121,11 +119,9 @@ function check_form_verify () {
         return false;
     }
     const txid = form.txid.value;
-    if (txid.length != 32) {
+    if (txid.length != 64) {
         return false;
-        //else if characters not allowed in txid
     }
-
     return true;
 }
 
@@ -167,22 +163,28 @@ function check_mnemonics() {
     return true;
 }
 
-/* function verify() {
+ function verify() {
     const form = document.getElementById('form_verify');
     const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
     const year = buffer.Buffer.from(form.awarding_year.value);
     const name = buffer.Buffer.from(form.student_name.value.toLowerCase().replace(/\s+/g, ''));
     const birthdate = buffer.Buffer.from(form.student_birthdate.value.replace(/\//g, ''));
-    const submittedtx = buffer.Buffer.from(form.student_txid.value);
+    const txid = form.txid.value;
     const hash = Bitcoin.crypto.sha256(rncp + year + name + birthdate);
 
-    const txfromapi = fetch(`https://blockstream.info/testnet/api/tx/${submittedtx}`, {
-        method: 'GET',
-
-        }).then(txfromapi => {console.log(txfromapi)})
+    return fetch(`https://blockstream.info/testnet/api/tx/${txid}`).then(r => r.json()).then((tx) => {
+        for (let i = 0; i < tx.vout.length; ++i) {
+            // If this output contains an OPRETURN
+            if (tx.vout[i].scriptpubkey.substr(0,2) == '6a') {
+                const opreturn_hash = tx.vout[i].scriptpubkey.substr(4);
+                if (opreturn_hash == hash.toString('hex')) {
+                    return true;
+                }
+            }
+        }
+        return false; // return here so we check all the outputs, in the unlikely case where the tx contains many OPRETURN
+    })
 }
-
-*/
 
 
 // Creates a Bitcoin transaction with an OP_RETURN as output containing the hash of the informations
@@ -201,6 +203,7 @@ function createTransaction(mnemonics) {
     }
     const keypair = Bitcoin.ECPair.fromPrivateKey(mnemonic_entropy, { network: Bitcoin.networks.testnet });
     const address = Bitcoin.payments.p2pkh({pubkey: keypair.publicKey, network: Bitcoin.networks.testnet}).address; // :'(
+    console.log(address);
     // Get the hash from form entries
     const form = document.getElementById('form_certify');
     const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
@@ -212,6 +215,7 @@ function createTransaction(mnemonics) {
     const tx = new Bitcoin.TransactionBuilder(Bitcoin.networks.testnet);
     out_opreturn = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, hash])
     tx.addOutput(out_opreturn, 0);
+    console.log(hash);
     // 10 blocks confirmation is OK, no need for an instant inclusion in a block.
     return fetch('https://blockstream.info/testnet/api/fee-estimates').then((r) => r.json()).then((fees) => fees['10']).then((feerate) => {
         // Fetching UTXOs txids to add as input of this tx
@@ -245,7 +249,7 @@ function createTransaction(mnemonics) {
             if (sats_needed <= -35 * feerate) {
                 // It becomes viable to create another output
                 const value = -sats_needed - 40;
-                tx.addOutput(address, value);
+                tx.addOutput(address, Math.round(value));
             }
             else if (sats_needed > 0) {
                 throw 'Not enough funds';
@@ -349,7 +353,7 @@ function setup() {
                             result_div.classList.remove('alert-warning');
                             result_div.classList.add('alert-warning');
                         }
-                        result_div.innerHTML += ' ' + error;
+                        result_div.innerHTML += 'Could not send the transaction ' + error;
                         result_div.style.display = 'block';
                     });
                 }
@@ -359,20 +363,26 @@ function setup() {
                         result_div.classList.remove('alert-warning');
                         result_div.classList.add('alert-warning');
                     }
-                    result_div.innerHTML += ' ' + error;
+                    result_div.innerHTML = 'Could not send the transaction. ' + error;
                     result_div.style.display = 'block';
                 }
             }
         });
 
         // Verify page
-        /*document.getElementById('form_verify').addEventListener('click', (e) => {
+        document.getElementById('form_verify').btn_verify.addEventListener('click', (e) => {
             e.preventDefault();
-            if (check_form_certify()) {
-
-            if a_function_to_compute_the_hash_from_the_form_values_and_check_it();
+            if (check_form_verify()) {
+                verify().then((same_hash) => {
+                    if (same_hash) {
+                        console.log('AAA');
+                    }
+                    else {
+                        console.log('BBB');
+                    }
+                })
             }
-        }); */
+        });
 
     }, false);
 }
