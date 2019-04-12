@@ -22,8 +22,6 @@ function show_home() {
     aboutpage_div.style.display = 'none';
     // Set the header link as active
     set_active(document.getElementById('header_link_home'));
-    // Hide tx form error
-    document.getElementById('tx_form_result').style.display = 'none';
 }
 
 // Shows the page to certify a diploma
@@ -39,6 +37,8 @@ function show_certify() {
     aboutpage_div.style.display = 'none';
     // Set the header link as active
     set_active(document.getElementById('header_link_certify'));
+    // Hide tx form result
+    document.getElementById('tx_form_result').style.display = 'none';
 }
 
 // Shows the page to verify a diploma
@@ -54,6 +54,7 @@ function show_verify() {
     aboutpage_div.style.display = 'none';
     // Set the header link as active
     set_active(document.getElementById('header_link_verify'));
+    document.getElementById('verify_form_result').style.display = 'none';
 }
 
 // Shows the page about
@@ -203,7 +204,6 @@ function createTransaction(mnemonics) {
     }
     const keypair = Bitcoin.ECPair.fromPrivateKey(mnemonic_entropy, { network: Bitcoin.networks.testnet });
     const address = Bitcoin.payments.p2pkh({pubkey: keypair.publicKey, network: Bitcoin.networks.testnet}).address; // :'(
-    console.log(address);
     // Get the hash from form entries
     const form = document.getElementById('form_certify');
     const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
@@ -215,7 +215,6 @@ function createTransaction(mnemonics) {
     const tx = new Bitcoin.TransactionBuilder(Bitcoin.networks.testnet);
     out_opreturn = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, hash])
     tx.addOutput(out_opreturn, 0);
-    console.log(hash);
     // 10 blocks confirmation is OK, no need for an instant inclusion in a block.
     return fetch('https://blockstream.info/testnet/api/fee-estimates').then((r) => r.json()).then((fees) => fees['10']).then((feerate) => {
         // Fetching UTXOs txids to add as input of this tx
@@ -372,13 +371,30 @@ function setup() {
         // Verify page
         document.getElementById('form_verify').btn_verify.addEventListener('click', (e) => {
             e.preventDefault();
+            document.getElementById('verify_form_result').style.display = 'none';
             if (check_form_verify()) {
                 verify().then((same_hash) => {
                     if (same_hash) {
-                        console.log('AAA');
+                        const result_div = document.getElementById('verify_form_result');
+                        const form = document.getElementById('form_verify');
+                        if (result_div.classList.contains('alert-danger')) {
+                            result_div.classList.remove('alert-danger');
+                            result_div.classList.add('alert-success');
+                        }
+                        const diplom = form.diplom.value.split(' --- ')[0];
+                        result_div.innerHTML = `${form.student_name.value} has been certified to be "${diplom}" on ${form.awarding_year.value}`;
+                        result_div.style.display = 'block';
                     }
                     else {
-                        console.log('BBB');
+                        const result_div = document.getElementById('verify_form_result');
+                        const form = document.getElementById('form_verify');
+                        if (result_div.classList.contains('alert-success')) {
+                            result_div.classList.remove('alert-succes');
+                            result_div.classList.add('alert-danger');
+                        }
+                        const diplom = form.diplom.value.split(' --- ')[0];
+                        result_div.innerHTML = `${form.student_name.value} has not been certified to be "${diplom}". Please double check the inputs.`;
+                        result_div.style.display = 'block';
                     }
                 })
             }
