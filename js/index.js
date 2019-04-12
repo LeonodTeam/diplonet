@@ -314,6 +314,10 @@ function setup() {
         document.getElementById('header_link_certify').addEventListener('click', show_certify, false);
         document.getElementById('header_link_verify').addEventListener('click', show_verify, false);
         document.getElementById('header_link_about').addEventListener('click', show_about, false);
+        // Thumbnails
+        document.getElementById('img_company').addEventListener('click', show_verify, false);
+        document.getElementById('img_school').addEventListener('click', show_certify, false);
+        document.getElementById('img_graduate').addEventListener('click', show_verify, false);
 
         // Certify page
         document.getElementById('btn_certify').addEventListener('click', (e) => {

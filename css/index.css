@@ -27,8 +27,8 @@
   transition-duration: 0.4s;
 }
 
-.imghp {
-  border: 3px solid #68c2e8;
+#img_graduate, #img_school, #img_company {
+  cursor: pointer;
 }
 
 
@@ -60,11 +60,26 @@ a, nav, body {
 }
 
 /***********  ABOUT PAGE ****************/
+#about_div {
+  text-align: justify;
+}
+
+#about_div p, #about_div li {
+  font-size: 17px;
+}
+
 #about_title {
-  background-color: #bce2f3;
+  background-color: #A6D5F5;
+  padding-top: 10px;
+  padding-bottom: 7px;
+  margin-bottom: 1%;
+}
+
+#about_title > h2 {
+  font-weight: 700;
 }
 
 #about_list {
+  padding-top: 7px;
   line-height: 70%;
-  margin-left: 5%;
 }
