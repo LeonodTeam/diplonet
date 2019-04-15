@@ -72,60 +72,93 @@ function show_about() {
     set_active(document.getElementById('header_link_about'));
 }
 
-// Checks entries from user in the form to certify a diplom
+// Checks entries from user in the form to certify a diplom and feedbacks the user on error
 // :return: True if informations seems correct, False otherwise
 function check_form_certify() {
     const form = document.getElementById('form_certify');
+    const error = document.getElementById('form_certify_error');
+    error.style.display = 'none';
     if (form.diplom.value == '') {
+        error.innerHTML = 'Please select a diplom.';
+        error.style.display = 'block';
         return false;
-    } else if (!(2010 <= parseInt(form.diplom.awarding_year, 10) <= 2019)) {
+    } else if (!(2010 <= parseInt(form.awarding_year.value, 10) && parseInt(form.awarding_year.value, 10) <= 2019)) {
+        error.innerHTML = 'Please fill in a valid awarding date. (2010 -> 2019)';
+        error.style.display = 'block';
         return false;
     } else if (!form.student_name.value.match(/^[A-Za-z ]+$/)) {
-        // The name MUST be composed of only letters and space
+        error.innerHTML = 'Please fill in a valid name. What I call a "valid name" is a name given with only letters and spaces.<br>\
+            Ex: "Jean-Pierre Dupont" should be entered as "Jean Pierre Dupont"';
+        error.style.display = 'block';
         return false;
     }
     const birthdate = form.birthdate.value.split('/');
     if (birthdate.length != 3) {
+        error.innerHTML = 'Please fill in a valid birthdate. Ex: 01/01/1995';
+        error.style.display = 'block';
         return false;
-    } else if (!(1 <= parseInt(birthdate[0], 10) <= 31)) {
+    } else if (!(1 <= parseInt(birthdate[0], 10) && parseInt(birthdate[0], 10) <= 31)) {
+        error.innerHTML = 'Please fill in a valid birthdate. Ex: 01/01/1995';
+        error.style.display = 'block';
         return false;
-    } else if (!(1 <= parseInt(birthdate[1], 10) <= 12)) {
+    } else if (!(1 <= parseInt(birthdate[1], 10) && parseInt(birthdate[1], 10) <= 12)) {
+        error.innerHTML = 'Please fill in a valid birthdate. Ex: 01/01/1995';
+        error.style.display = 'block';
         return false;
-    } else if (!(1919 <= parseInt(birthdate[2], 10) <= 2019)) {
+    } else if (!(1919 <= parseInt(birthdate[2], 10) && parseInt(birthdate[2], 10) <= 2019)) {
+        error.innerHTML = 'Please fill in a valid birthdate. Ex: 01/01/1995 with the 1919 <= year <= 2019';
+        error.style.display = 'block';
         return false;
     }
     return true;
 }
 
-// Checks entries from user in the verify form
+// Checks entries from user in the verify form and feedbacks the user on error
 // :return: True if informations seems correct, False otherwise
 function check_form_verify () {
     const form = document.getElementById('form_verify');
+    const error = document.getElementById('form_verify_error');
+    error.style.display = 'none';
     if (form.diplom.value == '') {
+        error.innerHTML = 'Please select a diplom.';
+        error.style.display = 'block';
         return false;
-    } else if (!(2010 <= parseInt(form.diplom.awarding_year, 10) <= 2019)) {
+    } else if (!(2010 <= parseInt(form.awarding_year.value, 10) && parseInt(form.awarding_year.value, 10) <= 2019)) {
+        error.innerHTML = 'Please fill in a valid awarding date. (2010 -> 2019)';
+        error.style.display = 'block';
         return false;
     } else if (!form.student_name.value.match(/^[A-Za-z ]+$/)) {
-        // The name MUST be composed of only letters and space
+        error.innerHTML = 'Please fill in a valid name. What I call a "valid name" is a name given with only letters and spaces.<br>\
+            Ex: "Jean-Pierre Dupont" should be entered as "Jean Pierre Dupont"';
+        error.style.display = 'block';
         return false;
     }
     const birthdate = form.student_birthdate.value.split('/');
     if (birthdate.length != 3) {
+        error.innerHTML = 'Please fill in a valid birthdate. Ex: 01/01/1995';
+        error.style.display = 'block';
         return false;
-    } else if (!(1 <= parseInt(birthdate[0], 10) <= 31)) {
+    } else if (!(1 <= parseInt(birthdate[0], 10) && parseInt(birthdate[0], 10) <= 31)) {
+        error.innerHTML = 'Please fill in a valid birthdate. Ex: 01/01/1995';
+        error.style.display = 'block';
         return false;
-    } else if (!(1 <= parseInt(birthdate[1], 10) <= 12)) {
+    } else if (!(1 <= parseInt(birthdate[1], 10) && parseInt(birthdate[1], 10) <= 12)) {
+        error.innerHTML = 'Please fill in a valid birthdate. Ex: 01/01/1995';
+        error.style.display = 'block';
         return false;
-    } else if (!(1919 <= parseInt(birthdate[2], 10) <= 2019)) {
+    } else if (!(1919 <= parseInt(birthdate[2], 10) && parseInt(birthdate[2], 10) <= 2019)) {
+        error.innerHTML = 'Please fill in a valid birthdate. Ex: 01/01/1995 with the 1919 <= year <= 2019';
+        error.style.display = 'block';
         return false;
     }
     const txid = form.txid.value;
     if (txid.length != 64) {
+        error.innerHTML = 'Please fill in a valid transaction identifier (txid). This is a 64 characters hexadecimal value.';
+        error.style.display = 'block';
         return false;
     }
     return true;
 }
-
 
 // Customize the select2 searchbox behaviour. Makes the entries match if the user types the first letters,
 // non case-sensitive, without considering spaces. 
@@ -164,7 +197,7 @@ function check_mnemonics() {
     return true;
 }
 
- function verify() {
+ function verify_name() {
     const form = document.getElementById('form_verify');
     const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
     const year = buffer.Buffer.from(form.awarding_year.value);
@@ -377,7 +410,7 @@ function setup() {
             e.preventDefault();
             document.getElementById('verify_form_result').style.display = 'none';
             if (check_form_verify()) {
-                verify().then((same_hash) => {
+                verify_diplom().then((same_hash) => {
                     if (same_hash) {
                         const result_div = document.getElementById('verify_form_result');
                         const form = document.getElementById('form_verify');

@@ -31,6 +31,10 @@
   cursor: pointer;
 }
 
+#img_graduate:hover, #img_school:hover, #img_company:hover {
+  padding: .05rem;
+}
+
 
 /* *********** CERTIFY AND VERIFY PAGE ************ */
 .mainImage {
