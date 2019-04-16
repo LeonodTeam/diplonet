@@ -123,6 +123,15 @@ function check_mnemonics() {
     return true;
 }
 
+// :return: A string which is, given a form (DOM object), the concatenation of the fields value we hash to certify/verify
+function get_hash_informations(form) {
+    const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
+    const year = buffer.Buffer.from(form.awarding_year.value);
+    const name = buffer.Buffer.from(form.student_name.value.toLowerCase().replace(/\s+/g, ''));
+    const birthdate = buffer.Buffer.from(form.student_birthdate.value.replace(/\//g, ''));
+    return rncp + year + name + birthdate;
+}
+
 // Gives the appropriate feedback to the user at mnemonic submission
 // VOID
 function form_mnemonics_result(result, result_is_error=false) {
@@ -140,10 +149,20 @@ function form_mnemonics_result(result, result_is_error=false) {
             result_div.classList.add('alert-success');
         }
         result_div.innerHTML = 'Succesfully sent the transaction to the Bitcoin network. Txid : ' + result;
+        // Generate a QRcode which contains all needed informations to verify the diploma, i.e. the hash of the fields
+        // and the txid. Both datas are stored in the QR as an hexadecimal string.
+        const student_infos = get_hash_informations(document.getElementById('form_certify'));
+        const hash = Bitcoin.crypto.sha256(student_infos).toString('hex');
+        new QRCode(document.getElementById('certify_qrcode'), {
+            text: hash + result, // With 'result' being the txid
+            useSVG: true
+        });
     }
     result_div.style.display = 'block';       
 }
 
+// Gives the result of diplom verification, i.e. if hash matches
+// VOID
 function form_verify_result(same_hash) {
     const result_div = document.getElementById('verify_form_result');
     const form = document.getElementById('form_verify');

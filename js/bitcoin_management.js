@@ -15,12 +15,8 @@ function createTransaction(mnemonics) {
     const keypair = Bitcoin.ECPair.fromPrivateKey(mnemonic_entropy, { network: Bitcoin.networks.testnet });
     const address = Bitcoin.payments.p2pkh({pubkey: keypair.publicKey, network: Bitcoin.networks.testnet}).address; // :'(
     // Get the hash from form entries
-    const form = document.getElementById('form_certify');
-    const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
-    const year = buffer.Buffer.from(form.awarding_year.value);
-    const name = buffer.Buffer.from(form.student_name.value.toLowerCase().replace(/\s+/g, ''));
-    const birthdate = buffer.Buffer.from(form.student_birthdate.value.replace(/\//g, ''));
-    const hash = Bitcoin.crypto.sha256(rncp + year + name + birthdate);
+    const student_infos = get_hash_informations(document.getElementById('form_certify'));
+    const hash = Bitcoin.crypto.sha256(student_infos);
     // Create a transaction with an OP_RETURN output containing this hash
     const tx = new Bitcoin.TransactionBuilder(Bitcoin.networks.testnet);
     out_opreturn = Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, hash])
@@ -77,14 +73,10 @@ function createTransaction(mnemonics) {
 // :return: A promise that resolves as a boolean.
 function verify_diplom() {
     const form = document.getElementById('form_verify');
-    const rncp = buffer.Buffer.from(form.diplom.value.split(' RNCP : ')[1]); // OUCH.. :"(
-    const year = buffer.Buffer.from(form.awarding_year.value);
-    const name = buffer.Buffer.from(form.student_name.value.toLowerCase().replace(/\s+/g, ''));
-    const birthdate = buffer.Buffer.from(form.student_birthdate.value.replace(/\//g, ''));
-    const txid = form.txid.value;
-    const hash = Bitcoin.crypto.sha256(rncp + year + name + birthdate);
+    const student_infos = get_hash_informations(form);
+    const hash = Bitcoin.crypto.sha256(student_infos);
 
-    return fetch(`https://blockstream.info/testnet/api/tx/${txid}`).then(r => r.json()).then((tx) => {
+    return fetch(`https://blockstream.info/testnet/api/tx/${form.txid.value}`).then(r => r.json()).then((tx) => {
         for (let i = 0; i < tx.vout.length; ++i) {
             // If this output contains an OPRETURN
             if (tx.vout[i].scriptpubkey.substr(0,2) == '6a') {
