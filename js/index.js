@@ -2,7 +2,7 @@
 function setup() {
     document.addEventListener('DOMContentLoaded', () => {
         show_home();
-        
+
         // Populate diplom list in <select>s
         const element_select_certify = document.getElementById('diplom_list_certify');
         const element_select_verify = document.getElementById('diplom_list_verify');
@@ -76,33 +76,15 @@ function setup() {
                             }
                         }).then((r) => r.text())
                         .then((txid) => {
-                            const result_div = document.getElementById('tx_form_result');
-                            if (result_div.classList.contains('alert-warning')) {
-                                result_div.classList.remove('alert-warning');
-                                result_div.classList.add('alert-success');
-                            }
-                            result_div.innerHTML = 'Succesfully sent the transaction to the Bitcoin network. Txid : ' + txid;
-                            result_div.style.display = 'block';
+                            form_mnemonics_result(txid);
                         });
                     })
                     .catch((error) => {
-                        const result_div = document.getElementById('tx_form_result');
-                        if (result_div.classList.contains('alert-success')) {
-                            result_div.classList.remove('alert-warning');
-                            result_div.classList.add('alert-warning');
-                        }
-                        result_div.innerHTML += 'Could not send the transaction ' + error;
-                        result_div.style.display = 'block';
+                        form_mnemonics_result(error, true);
                     });
                 }
                 catch (error) {
-                    const result_div = document.getElementById('tx_form_result');
-                    if (result_div.classList.contains('alert-success')) {
-                        result_div.classList.remove('alert-warning');
-                        result_div.classList.add('alert-warning');
-                    }
-                    result_div.innerHTML = 'Could not send the transaction. ' + error;
-                    result_div.style.display = 'block';
+                    form_mnemonics_result(error, true);
                 }
             }
         });
@@ -113,28 +95,7 @@ function setup() {
             document.getElementById('verify_form_result').style.display = 'none';
             if (check_form_verify()) {
                 verify_diplom().then((same_hash) => {
-                    if (same_hash) {
-                        const result_div = document.getElementById('verify_form_result');
-                        const form = document.getElementById('form_verify');
-                        if (result_div.classList.contains('alert-danger')) {
-                            result_div.classList.remove('alert-danger');
-                            result_div.classList.add('alert-success');
-                        }
-                        const diplom = form.diplom.value.split(' --- ')[0];
-                        result_div.innerHTML = `${form.student_name.value} has been certified to be "${diplom}" on ${form.awarding_year.value}`;
-                        result_div.style.display = 'block';
-                    }
-                    else {
-                        const result_div = document.getElementById('verify_form_result');
-                        const form = document.getElementById('form_verify');
-                        if (result_div.classList.contains('alert-success')) {
-                            result_div.classList.remove('alert-succes');
-                            result_div.classList.add('alert-danger');
-                        }
-                        const diplom = form.diplom.value.split(' --- ')[0];
-                        result_div.innerHTML = `${form.student_name.value} has not been certified to be "${diplom}". Please double check the inputs.`;
-                        result_div.style.display = 'block';
-                    }
+                    form_verify_result(same_hash);                   
                 })
             }
         });

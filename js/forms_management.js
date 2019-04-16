@@ -122,3 +122,44 @@ function check_mnemonics() {
     });
     return true;
 }
+
+// Gives the appropriate feedback to the user at mnemonic submission
+// VOID
+function form_mnemonics_result(result, result_is_error=false) {
+    const result_div = document.getElementById('tx_form_result');
+    if (result_is_error) {
+        if (result_div.classList.contains('alert-success')) {
+            result_div.classList.remove('alert-warning');
+            result_div.classList.add('alert-warning');
+        }
+        result_div.innerHTML = 'Could not send the transaction ' + result;
+    } else {
+        // If there is no error, then the result MUST be a txid
+        if (result_div.classList.contains('alert-warning')) {
+            result_div.classList.remove('alert-warning');
+            result_div.classList.add('alert-success');
+        }
+        result_div.innerHTML = 'Succesfully sent the transaction to the Bitcoin network. Txid : ' + result;
+    }
+    result_div.style.display = 'block';       
+}
+
+function form_verify_result(same_hash) {
+    const result_div = document.getElementById('verify_form_result');
+    const form = document.getElementById('form_verify');
+    const diplom = form.diplom.value.split(' --- ')[0];
+    if (same_hash) {
+        if (result_div.classList.contains('alert-danger')) {
+            result_div.classList.remove('alert-danger');
+            result_div.classList.add('alert-success');
+        }
+        result_div.innerHTML = `${form.student_name.value} has been certified to be "${diplom}" on ${form.awarding_year.value}`;
+    } else {
+        if (result_div.classList.contains('alert-success')) {
+            result_div.classList.remove('alert-succes');
+            result_div.classList.add('alert-danger');
+        }
+        result_div.innerHTML = `${form.student_name.value} has not been certified to be "${diplom}". Please double check the inputs.`;   
+    }
+    result_div.style.display = 'block';
+}
